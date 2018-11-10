@@ -32,6 +32,7 @@ class Graph {
   bool TryStep(const Op& op);
   bool HasStep(const Op& op) const;
   bool IsAtRoot() const;
+  bool IsAtTerminal() const;
 
   std::string GetState() const;
   std::vector<Op> GetOpTrace() const;
@@ -94,6 +95,12 @@ bool Graph<Op>::TryStep(const Op& op) {
 template <typename Op>
 bool Graph<Op>::IsAtRoot() const {
   return curr_state_ == &root_;
+}
+
+template <typename Op>
+bool Graph<Op>::IsAtTerminal() const {
+  auto it = states_.find(*curr_state_);
+  return it->second.IsTerminal();
 }
 
 template <typename Op>
