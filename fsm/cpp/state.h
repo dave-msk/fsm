@@ -1,7 +1,6 @@
 #ifndef FSM_CORE_STATE_H
 #define FSM_CORE_STATE_H
 #include <map>
-#include <string>
 #include <sstream>
 #include "exceptions.h"
 
