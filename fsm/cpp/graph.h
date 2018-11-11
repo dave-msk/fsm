@@ -9,54 +9,61 @@
 
 namespace fsm {
 
-template <typename Op>
+template <typename K, typename T>
 class Graph {
  private:
-  std::string root_;
-  const std::string *curr_state_;
-  std::vector<Op> op_trace_;
-  std::vector<std::string> state_trace_;
-  std::map<std::string, fsm::State<Op>> states_;
+  K root_;
+  const K *curr_state_;
+  std::vector<T> op_trace_;
+  std::vector<K> state_trace_;
+  std::map<K, fsm::State<K, T>> states_;
 
-  void SetState(const std::string& state_id);
+  void SetState(const K& id);
  public:
 
-  explicit Graph(const State<Op>& root) : root_(root.GetId()) {
+  explicit Graph(const State<K, T>& root) : root_(root.GetId()) {
     curr_state_ = &root_;
     AddState(root);
   }
 
-  void AddState(const State<Op>& state);
+  void AddState(const State<K, T>& state);
   void Reset();
-  void Step(const Op& op);
-  bool TryStep(const Op& op);
-  bool HasStep(const Op& op) const;
+  void Step(const T& t);
+  bool TryStep(const T& t);
+  bool HasStep(const T& t) const;
+
   bool IsAtRoot() const;
   bool IsAtTerminal() const;
 
-  std::string GetState() const;
-  std::vector<Op> GetOpTrace() const;
-  std::vector<std::string> GetStateTrace() const;
+  State<K, T>& GetState();
+  const K& GetStateId() const;
+  std::vector<T> GetOpTrace() const;
+  std::vector<K> GetStateTrace() const;
 
-  friend Graph& operator<<(Graph& output, const State<Op>& state) {
+  friend Graph& operator<<(Graph& output, const State<K, T> &state) {
     output.AddState(state);
     return output;
   }
 };
 
-template <typename Op>
-void Graph<Op>::SetState(const std::string &state_id) {
-  curr_state_ = &state_id;
-  state_trace_.push_back(state_id);
+template <typename K, typename T>
+void Graph<K, T>::SetState(const K &id) {
+  curr_state_ = &id;
+  state_trace_.push_back(id);
 }
 
-template <typename Op>
-std::string Graph<Op>::GetState() const {
+template <typename K, typename T>
+State<K, T>& Graph<K, T>::GetState() {
+  return states_[*curr_state_];
+}
+
+template <typename K, typename T>
+const K& Graph<K, T>::GetStateId() const {
   return *curr_state_;
 }
 
-template <typename Op>
-void Graph<Op>::AddState(const fsm::State<Op> &state) {
+template <typename K, typename T>
+void Graph<K, T>::AddState(const fsm::State<K, T> &state) {
   auto it = states_.find(state.GetId());
   if (it != states_.end()) {
     std::stringstream ss;
@@ -66,50 +73,50 @@ void Graph<Op>::AddState(const fsm::State<Op> &state) {
   states_[state.GetId()] = state;
 }
 
-template <typename Op>
-void Graph<Op>::Reset() {
+template <typename K, typename T>
+void Graph<K, T>::Reset() {
   state_trace_.clear();
   op_trace_.clear();
   SetState(root_);
 }
 
-template <typename Op>
-void Graph<Op>::Step(const Op& op) {
-  op_trace_.push_back(op);
-  SetState(states_[*curr_state_].Transit(op));
+template <typename K, typename T>
+void Graph<K, T>::Step(const T &t) {
+  op_trace_.push_back(t);
+  SetState(states_[*curr_state_].Transit(t));
 }
 
-template <typename Op>
-bool Graph<Op>::HasStep(const Op &op) const {
+template <typename K, typename T>
+bool Graph<K, T>::HasStep(const T &t) const {
   auto it = states_.find(*curr_state_);
-  return it->second.HasOp(op);
+  return it->second.HasTransition(t);
 }
 
-template <typename Op>
-bool Graph<Op>::TryStep(const Op& op) {
-  if (!HasStep(op)) return false;
-  Step(op);
+template <typename K, typename T>
+bool Graph<K, T>::TryStep(const T &t) {
+  if (!HasStep(t)) return false;
+  Step(t);
   return true;
 }
 
-template <typename Op>
-bool Graph<Op>::IsAtRoot() const {
+template <typename K, typename T>
+bool Graph<K, T>::IsAtRoot() const {
   return curr_state_ == &root_;
 }
 
-template <typename Op>
-bool Graph<Op>::IsAtTerminal() const {
+template <typename K, typename T>
+bool Graph<K, T>::IsAtTerminal() const {
   auto it = states_.find(*curr_state_);
   return it->second.IsTerminal();
 }
 
-template <typename Op>
-std::vector<Op> Graph<Op>::GetOpTrace() const {
+template <typename K, typename T>
+std::vector<T> Graph<K, T>::GetOpTrace() const {
   return op_trace_;
 }
 
-template <typename Op>
-std::vector<std::string> Graph<Op>::GetStateTrace() const {
+template <typename K, typename T>
+std::vector<K> Graph<K, T>::GetStateTrace() const {
   return state_trace_;
 }
 
