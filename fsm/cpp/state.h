@@ -13,7 +13,8 @@ class State {
   K id_;
   bool is_terminal_ = false;
  public:
-  State() {};
+  State() = default;
+  explicit State(const K &id) : id_(id) {};
   State(const K &id, const bool is_terminal)
       : id_(id), is_terminal_(is_terminal) {};
 

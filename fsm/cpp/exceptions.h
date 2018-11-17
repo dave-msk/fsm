@@ -6,7 +6,7 @@
 namespace fsm {
 
 struct Exception : std::exception {
- private:
+ protected:
   std::string message_;
  public:
   explicit Exception(const std::string& message)
@@ -23,6 +23,10 @@ struct DuplicatedKeyException : public Exception {
 
 struct InvalidTransitionException : public Exception {
   using Exception::Exception;
+};
+
+struct FrozenGraphException : public Exception {
+  FrozenGraphException() : Exception("Frozen graph is not modifiable.") {};
 };
 
 }
