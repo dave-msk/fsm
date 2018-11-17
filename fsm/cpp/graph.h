@@ -17,7 +17,7 @@ class Graph {
   std::vector<K> state_trace_;
   std::map<K, fsm::State<K, T>> states_;
 
-  bool finalized;
+  bool finalized = false;
 
   // ### Internal helper methods ###
   void SetState(const K& id);
